@@ -1,19 +1,74 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Coin } from '@/components/Coin';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import { History, LogIn } from 'lucide-react';
 
 const Index = () => {
+  const navigate = useNavigate();
   const [option1, setOption1] = useState('');
   const [option2, setOption2] = useState('');
   const [isFlipping, setIsFlipping] = useState(false);
   const [result, setResult] = useState<'heads' | 'tails' | null>(null);
   const [assignment, setAssignment] = useState<{heads: string, tails: string} | null>(null);
   const [winner, setWinner] = useState<string>('');
+  const [user, setUser] = useState(null);
 
-  const flipCoin = () => {
+  // Check auth on mount
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signIn = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+    });
+    if (error) {
+      toast.error('Error signing in: ' + error.message);
+    }
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    toast.success('Signed out successfully');
+  };
+
+  const saveFlipResult = async (flipData: any) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('flip_history')
+      .insert({
+        user_id: user.id,
+        option_1: flipData.option1,
+        option_2: flipData.option2,
+        heads_option: flipData.heads,
+        tails_option: flipData.tails,
+        result: flipData.result,
+        winner: flipData.winner,
+      });
+
+    if (error) {
+      console.error('Error saving flip:', error);
+      toast.error('Failed to save flip to history');
+    } else {
+      toast.success('Flip saved to history!');
+    }
+  };
+
+  const flipCoin = async () => {
     if (!option1.trim() || !option2.trim()) {
       toast.error('Please enter both options before flipping!');
       return;
@@ -31,13 +86,27 @@ const Index = () => {
     setAssignment(randomAssignment);
 
     // Simulate coin flip result after a delay
-    setTimeout(() => {
+    setTimeout(async () => {
       const flipResult = Math.random() < 0.5 ? 'heads' : 'tails';
+      const winningOption = randomAssignment[flipResult];
+      
       setResult(flipResult);
-      setWinner(randomAssignment[flipResult]);
+      setWinner(winningOption);
       setIsFlipping(false);
       
-      toast.success(`The coin has decided: ${randomAssignment[flipResult]}!`);
+      // Save to database if user is signed in
+      if (user) {
+        await saveFlipResult({
+          option1,
+          option2,
+          heads: randomAssignment.heads,
+          tails: randomAssignment.tails,
+          result: flipResult,
+          winner: winningOption,
+        });
+      }
+      
+      toast.success(`The coin has decided: ${winningOption}!`);
     }, 1000);
   };
 
@@ -54,13 +123,47 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-bg flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-2xl space-y-8">
         {/* Header */}
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-4">
           <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Coin Flip Decider
           </h1>
           <p className="text-muted-foreground text-lg">
             Let fate decide between your two options
           </p>
+          
+          {/* Auth & Navigation */}
+          <div className="flex justify-center gap-4">
+            {user ? (
+              <>
+                <Button
+                  onClick={() => navigate('/history')}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <History size={16} />
+                  View History
+                </Button>
+                <Button
+                  onClick={signOut}
+                  variant="ghost"
+                  size="sm"
+                >
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={signIn}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <LogIn size={16} />
+                Sign In to Save History
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Input Section */}

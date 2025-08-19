@@ -14,7 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      flip_history: {
+        Row: {
+          created_at: string
+          heads_option: string
+          id: string
+          option_1: string
+          option_2: string
+          result: string
+          tails_option: string
+          user_id: string | null
+          winner: string
+        }
+        Insert: {
+          created_at?: string
+          heads_option: string
+          id?: string
+          option_1: string
+          option_2: string
+          result: string
+          tails_option: string
+          user_id?: string | null
+          winner: string
+        }
+        Update: {
+          created_at?: string
+          heads_option?: string
+          id?: string
+          option_1?: string
+          option_2?: string
+          result?: string
+          tails_option?: string
+          user_id?: string | null
+          winner?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
