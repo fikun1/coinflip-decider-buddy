@@ -8,35 +8,49 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 235 25% 8%;
+    --foreground: 45 23% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 230 25% 12%;
+    --card-foreground: 45 23% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 230 25% 12%;
+    --popover-foreground: 45 23% 95%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 45 93% 65%;
+    --primary-foreground: 230 25% 12%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 45 23% 18%;
+    --secondary-foreground: 45 23% 95%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 230 25% 15%;
+    --muted-foreground: 45 12% 70%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 45 93% 65%;
+    --accent-foreground: 230 25% 12%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 45 23% 95%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 230 25% 18%;
+    --input: 230 25% 18%;
+    --ring: 45 93% 65%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Coin colors */
+    --coin-gold: 45 93% 65%;
+    --coin-gold-dark: 38 85% 55%;
+    --coin-gold-light: 50 95% 75%;
+    --coin-shadow: 235 25% 8%;
+
+    /* Gradients */
+    --gradient-coin: linear-gradient(135deg, hsl(var(--coin-gold-light)), hsl(var(--coin-gold)), hsl(var(--coin-gold-dark)));
+    --gradient-bg: linear-gradient(135deg, hsl(var(--background)), hsl(230 25% 10%));
+    
+    /* Animation */
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --sidebar-background: 0 0% 98%;
 
@@ -101,5 +115,27 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  
+  .rotate-y-0 {
+    transform: rotateY(0deg);
+  }
+  
+  .rotate-y-180 {
+    transform: rotateY(180deg);
   }
 }
